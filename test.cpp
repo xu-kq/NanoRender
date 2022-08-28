@@ -11,13 +11,21 @@ int main() {
 			if (i == j)	m[i][j] = 1;
 		}
 	}
-	m[0][0] = 0, m[0][1] = -1;
-	m[1][0] = 1, m[1][1] = 0;
+	m[0][0] = 1.f/2, m[0][1] = -std::sqrt(3.f)/2;
+	m[1][0] = std::sqrt(3.f) / 2, m[1][1] = 1.f/2;
 	
 	std::cout << "rotation matrix:" << std::endl;
 	std::cout << m << std::endl;
 
 	std::cout << "before rotate:" << std::endl;
 	std::cout << m * v0 << std::endl;
+
+	Matrix4f inv_m;
+	inv_m[0][0] = 1.f / 2, inv_m[0][1] = std::sqrt(3.f) / 2;
+	inv_m[1][0] = -std::sqrt(3.f) / 2, inv_m[1][1] = 1.f / 2;
+
+	std::cout << "orthogonal matrix dot:" << std::endl;
+	std::cout << m * inv_m << std::endl;
+
 	return 0;
 }

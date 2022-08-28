@@ -1,6 +1,7 @@
 #pragma once
 
 #include<iostream>
+#include <iomanip>
 #include<vector>
 #include<cmath>
 
@@ -69,7 +70,7 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, Vector4f v) {
-	os << v[0] << "\n" << v[1] << "\n" << v[2] << "\n" << v[3] << std::endl;
+	os << std::setprecision(4) << v[0] << "\n" << v[1] << "\n" << v[2] << "\n" << v[3] << std::endl;
 	return os;
 }
 
