@@ -9,7 +9,8 @@ add_subdirectory("include")
 
 # add the excutable
 add_executable(NanoRasterizer "main.cpp")
-target_link_libraries(NanoRasterizer PUBLIC Lodepng)
+
+target_link_libraries(NanoRasterizer PUBLIC Lodepng Algebra)
 target_include_directories(NanoRasterizer PUBLIC
 							"${PROJECT_SOURCE_DIR}/include"
 							)
