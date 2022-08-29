@@ -1,7 +1,6 @@
 #pragma once
-
 #include<iostream>
-#include <iomanip>
+#include<iomanip>
 #include<vector>
 #include<cmath>
 
@@ -19,11 +18,12 @@ public:
 private:
 	float _x, _y;
 };
+
 class Vector3f {
 public:
 	Vector3f() = default;
 	Vector3f(float xx, float yy, float zz) : _x(xx), _y(yy), _z(zz) { }
-
+	Vector3f(const float* arr) : _x(arr[0]), _y(arr[1]), _z(arr[2]) { }
 	float x() const { return _x; }
 	float y() const { return _y; }
 	float z() const { return _z; }
@@ -50,6 +50,13 @@ public:
 	float z() const { return _z; }
 	float w() const { return _w; }
 
+	Vector4f& operator/(float div) {
+		_x /= div;
+		_y /= div;
+		_z /= div;
+		_w /= div;
+		return *this;
+	}
 	float& operator[](const int i) { return (&_x)[i]; }
 	const float& operator[](const int i) const { return (&_x)[i]; }
 
@@ -59,3 +66,7 @@ public:
 private:
 	float _x, _y, _z, _w;
 };
+
+std::ostream& operator<<(std::ostream&, const Vector3f&);
+std::ostream& operator<<(std::ostream&, const Vector4f&);
+Vector4f to_vec4(const Vector3f& v);
