@@ -8,7 +8,7 @@ project(NanoRasterizer)
 add_subdirectory("include")
 
 # add the excutable
-add_executable(NanoRasterizer "main.cpp" "rasterizer.cpp")
+add_executable(NanoRasterizer "main.cpp" "rasterizer.cpp" "triangle.cpp")
 
 target_link_libraries(NanoRasterizer PUBLIC Lodepng Algebra)
 target_include_directories(NanoRasterizer PUBLIC

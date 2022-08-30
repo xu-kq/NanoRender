@@ -1,8 +1,7 @@
 #include"Vector.hpp"
 
-
-std::ostream& operator<<(std::ostream& os, Vector3f v) {
-	os << v[0] << "\n" << v[1] << "\n" << v[2];
+std::ostream& operator<<(std::ostream& os, const Vector3f& v) {
+	os << std::setprecision(4) << v[0] << "\t" << v[1] << "\t" << v[2] << std::endl;
 	return os;
 }
 
@@ -24,9 +23,8 @@ Vector3f Vector3f::cross(const Vector3f& rhs) const {
 }
 
 
-
-std::ostream& operator<<(std::ostream& os, Vector4f v) {
-	os << std::setprecision(4) << v[0] << "\n" << v[1] << "\n" << v[2] << "\n" << v[3] << std::endl;
+std::ostream& operator<<(std::ostream& os, const Vector4f& v) {
+	os << std::setprecision(4) << v[0] << "\t" << v[1] << "\t" << v[2] << "\t" << v[3] << std::endl;
 	return os;
 }
 
@@ -36,4 +34,8 @@ float Vector4f::dot(const Vector4f& rhs) const {
 
 float Vector4f::norm() const {
 	return std::sqrt(this->dot(*this));
+}
+
+Vector4f to_vec4(const Vector3f& v) {
+	return Vector4f(v.x(), v.y(), v.z(), 1.f);
 }
