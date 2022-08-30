@@ -10,13 +10,13 @@ public:
 	Vector2i() = default;
 	Vector2i(int xx, int yy) : _x(xx), _y(yy) { }
 
-	float x() const { return _x; }
-	float y() const { return _y; }
+	int x() const { return _x; }
+	int y() const { return _y; }
 
-	float& operator[](const int i) { return (&_x)[i]; }
-	const float& operator[](const int i) const { return (&_x)[i]; }
+	int& operator[](const int i) { return (&_x)[i]; }
+	const int& operator[](const int i) const { return (&_x)[i]; }
 private:
-	float _x, _y;
+	int _x, _y;
 };
 
 class Vector3f {
@@ -24,6 +24,9 @@ public:
 	Vector3f() = default;
 	Vector3f(float xx, float yy, float zz) : _x(xx), _y(yy), _z(zz) { }
 	Vector3f(const float* arr) : _x(arr[0]), _y(arr[1]), _z(arr[2]) { }
+	float& x()  { return _x; }
+	float& y()  { return _y; }
+	float& z()  { return _z; }
 	float x() const { return _x; }
 	float y() const { return _y; }
 	float z() const { return _z; }
@@ -33,6 +36,8 @@ public:
 
 	float dot(const Vector3f&) const;
 	Vector3f cross(const Vector3f&) const;
+	Vector3f cwsiseDot(float) const;
+	Vector3f operator+(const Vector3f&) const;
 	float norm() const;
 
 private:

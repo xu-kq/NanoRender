@@ -31,7 +31,7 @@ public:
 		++count;
 		return *this;
 	}
-	~Comma_buffer() {
+	~Comma_buffer() noexcept(false) {
 		if (count != 16) {
 			std::cerr << 
 				"Too few coefficients passed to comma initializer (operator<<)" 

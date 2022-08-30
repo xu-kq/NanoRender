@@ -13,6 +13,13 @@ float Vector3f::norm() const {
 	return std::sqrt(this->dot(*this));
 }
 
+Vector3f Vector3f::cwsiseDot(float rhs) const {
+	return Vector3f(rhs * this->x(), rhs * this->y(), rhs * this->z());
+}
+
+Vector3f Vector3f::operator+(const Vector3f& rhs) const {
+	return Vector3f(rhs.x() + this->x(), rhs.y() + this->y(), rhs.z() + this->z());
+}
 Vector3f Vector3f::cross(const Vector3f& rhs) const {
 
 	Vector3f res;

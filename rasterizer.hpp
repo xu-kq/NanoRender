@@ -1,38 +1,31 @@
 #pragma once
-#include<lodepng.h>
 #include"Matrix.hpp"
 #include"Triangle.hpp"
 #include<vector>
+#include<algorithm>
+#include<tuple>
+enum DrawType { WIREFRAME, FRAGMENT};
 
 class Rasterizer {
 public:
-	Rasterizer() : Rasterizer(700, 700) { }
-	Rasterizer(int width, int height)
-		: Rasterizer("../../../image/output.png", width, height) { }
-	Rasterizer(const char* filename, int width, int height)
-		: Filename(new char[strlen(filename) + 1]),
-		Width(width), Height(height), frame_buffer(4 * width * height) {
-		memcpy(Filename, filename, strlen(filename) + 1);
-	}
-	Rasterizer(Rasterizer&) = delete;
-	Rasterizer(Rasterizer&&) = delete;
-	~Rasterizer() { 
-		delete[] Filename; 
-		Filename = nullptr; 
-	}
+	Rasterizer(int width, int height, unsigned char* fb)
+		: frame_buffer(fb), Width(width), Height(height),
+		depth_buffer(Width*Height, std::numeric_limits<float>::lowest()) {}
 
-	void rasterize(Triangle&);
-	void show();
-
+	void draw_wireframe(Triangle&);
+	void draw_fragment(Triangle&);
+	void draw(std::vector<Triangle*>, DrawType);
 	void set_model_matrix(const Matrix4f&);
 	void set_view_matrix(const Matrix4f&);
 	void set_projection_matrix(const Matrix4f&);
+	void flush();
+
 
 private:
-	char* Filename = nullptr;
 	const int Height = 700,
 		Width = 700;
-	std::vector<unsigned char> frame_buffer;
+	unsigned char* frame_buffer;
+	std::vector<float> depth_buffer;
 
 	Matrix4f m;
 	Matrix4f v;
@@ -42,10 +35,7 @@ private:
 	void plot_line(const Vector2i& start, const Vector2i& end, const Vector3f& color = Vector3f(255, 255, 255));
 	void plot_line(float x1, float y1, float x2, float y2, const Vector3f& color = Vector3f(255, 255, 255));
 
-	void plot_triangle_wireframe(Triangle&);
-
 	// utility function
 	void set_pixel(int, int, const Vector3f&);
 	void set_pixel(const Vector2i&, const Vector3f&);
-	void flush();
 };
