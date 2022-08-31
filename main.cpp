@@ -46,7 +46,7 @@ Matrix4f get_view_matrix(const Vector3f view_pos, const Vector3f& t, const Vecto
 	v = rotation * translation;
 
 	return v;
-}
+			}
 Matrix4f get_projection_matrix(float fov, float aspect_ratio, float zNear, float zFar) {
 	fov = fov / 180 * MY_PI;
 	float t, d, l, r, n, f;
@@ -71,7 +71,7 @@ Matrix4f get_projection_matrix(float fov, float aspect_ratio, float zNear, float
 		0, 0, 0, 1;
 	v = orthographic * projection;
 	return v;
-}
+		}
 
 int main(void)
 {
@@ -83,7 +83,7 @@ int main(void)
 		_T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
 
 	if (screen.screen_init(Width, Height, title))
-		return -1;
+			return -1;
 
 	Rasterizer r(Width, Height, screen.get_frame_buffer());
 
@@ -128,7 +128,7 @@ int main(void)
 		Vertex v2(vert[indice[2]], cols[indice[2]]);
 		t = new Triangle(v0, v1, v2);
 		Tri_lists.emplace_back(t);
-}
+	}
 
 	int indicator = 0;
 	int kbhit = 0;
@@ -151,8 +151,8 @@ int main(void)
 				kbhit = 1;
 				if (++indicator >= 3) indicator = 0;
 				//device.render_state = states[indicator];
-			}
 		}
+	}
 		else {
 			kbhit = 0;
 		}
