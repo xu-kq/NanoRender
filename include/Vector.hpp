@@ -24,6 +24,7 @@ public:
 	Vector3f() = default;
 	Vector3f(float xx, float yy, float zz) : _x(xx), _y(yy), _z(zz) { }
 	Vector3f(const float* arr) : _x(arr[0]), _y(arr[1]), _z(arr[2]) { }
+	Vector3f(std::vector<float>& arr) : _x(arr[0]), _y(arr[1]), _z(arr[2]) { }
 	float& x()  { return _x; }
 	float& y()  { return _y; }
 	float& z()  { return _z; }

@@ -4,13 +4,18 @@
 #include"global.hpp"
 #include"screen.hpp"
 #include"lodepng.h"
+#include"objLoader.hpp"
 
 Matrix4f get_model_matrix(Vector3f offset, float angle, float scale = 1.f) {
 	Matrix4f rotation;
 	angle = angle * MY_PI / 180.f;
-	rotation << cos(angle), -sin(angle), 0, 0,
-		sin(angle), cos(angle), 0, 0,
-		0, 0, 1, 0,
+	//rotation << cos(angle), -sin(angle), 0, 0,
+	//	sin(angle), cos(angle), 0, 0,
+	//	0, 0, 1, 0,
+	//	0, 0, 0, 1;
+	rotation << cos(angle), 0, sin(angle), 0,
+		0, 1, 0, 0,
+		-sin(angle), 0, cos(angle), 0,
 		0, 0, 0, 1;
 
 	float x_offset, y_offset, z_offset;
@@ -88,7 +93,7 @@ int main(void)
 	Rasterizer r(Width, Height, screen.get_frame_buffer());
 
 	Vector3f offset(0, 0, 0);
-	Vector3f view_pos(0, 0, 5);
+	Vector3f view_pos(0, 0, 10);
 	Vector3f up_dir(0, 1, 0);
 	Vector3f gaze(0, 0, -1);
 
@@ -97,35 +102,17 @@ int main(void)
 		aspect_ratio = 1,
 		zNear = -.1f,
 		zFar = -50;
+	std::string obj_filename("../../../models/spot/spot_triangulated_good.obj");
 
 // load triangles
-	float vert[][3] = {	
-		{2, 0, -2},
-		{0, 2, -2},
-		{-2, 0, -2},
-		{3.5, -1, -5},
-		{2.5, 1.5, -5},
-		{-1, 0.5, -5}
-	};
-	int indices[][3] = {
-		{0, 1, 2},
-		{3, 4, 5},
-	};
-	float cols[][3] = {
-			{217.0, 238.0, 185.0},
-			{217.0, 238.0, 185.0},
-			{217.0, 238.0, 185.0},
-			{185.0, 217.0, 238.0},
-			{185.0, 217.0, 238.0},
-			{185.0, 217.0, 238.0}
-	};
+	objLoader obj(obj_filename);
 
 	std::vector<Triangle*> Tri_lists;
 	Triangle* t;
-	for (auto& indice : indices) {
-		Vertex v0(vert[indice[0]], cols[indice[0]]);
-		Vertex v1(vert[indice[1]], cols[indice[1]]);
-		Vertex v2(vert[indice[2]], cols[indice[2]]);
+	for (auto& indice : obj.position_ind) {
+		Vertex v0(obj.vertex_position[indice[0]]);
+		Vertex v1(obj.vertex_position[indice[1]]);
+		Vertex v2(obj.vertex_position[indice[2]]);
 		t = new Triangle(v0, v1, v2);
 		Tri_lists.emplace_back(t);
 	}
@@ -139,7 +126,7 @@ int main(void)
 		r.set_model_matrix(get_model_matrix(offset, alpha, 1));
 		r.set_view_matrix(get_view_matrix(view_pos, up_dir, gaze));
 		r.set_projection_matrix(get_projection_matrix(fov, aspect_ratio, zNear, zFar));
-		r.draw(Tri_lists,DrawType::FRAGMENT);
+		r.draw(Tri_lists,DrawType::WIREFRAME);
 
 		if (screen.screen_keys[VK_UP] && view_pos.z() > -1e2) view_pos.z() -= .05f;
 		if (screen.screen_keys[VK_DOWN] && view_pos.z() < 1e2) view_pos.z() += .05f;
