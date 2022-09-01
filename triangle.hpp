@@ -3,9 +3,7 @@
 #include<Vector.hpp>
 class Vertex {
 public:
-	Vertex(Vector3f& v) : pos(v), col({255, 255, 255}) { }
-	Vertex(Vector3f& v, Vector3f& c) : pos(v), col(c) { }
-	Vertex(float* v, float* c) : pos(v), col(c) { }
+	Vertex(Vector3f& v, Vector3f& c = Vector3f(  255, 255, 255 )) : pos(v), col(c) { }
 	Vertex(std::vector<float>& v) : pos(v), col({ 255, 255, 255 }) { }
 public:
 	Vector3f pos;

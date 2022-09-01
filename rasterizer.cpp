@@ -11,8 +11,8 @@ void Rasterizer::set_pixel(const Vector2i& v, const Vector3f& color) {
 	frame_buffer[4 * Width * y + 4 * x + 3] = 255;
 }
 
-void Rasterizer::set_pixel(int x, int y, const Vector3f& color) {
-	set_pixel(Vector2i(x, y), color);
+void Rasterizer::set_pixel(const int x, const int y, const Vector3f& color) {
+	set_pixel({x, y}, color);
 }
 
 void Rasterizer::plot_line(const Vector2i& start, const Vector2i& end, 
@@ -103,9 +103,9 @@ void Rasterizer::plot_line(const Vector2i& start, const Vector2i& end,
 	set_pixel(sx, sy, color);
 }
 
-void Rasterizer::plot_line(float x1, float y1, float x2, float y2, 
+void Rasterizer::plot_line(const float x1, const float y1, const float x2, const float y2, 
 	const Vector3f& color) {
-	plot_line(Vector2i(int(x1), int(y1)), Vector2i(int(x2), int(y2)), color);
+	plot_line({ int(x1), int(y1) }, { int(x2), int(y2) }, color);
 }
 
 void Rasterizer::flush() {
@@ -147,13 +147,11 @@ void Rasterizer::draw_wireframe(Triangle& t) {
 	v1 = viewport * v1;
 	v2 = viewport * v2;
 
-	Vector2i vert0(int(v0.x()), int(v0.y()));
-	Vector2i vert1(int(v1.x()), int(v1.y()));
-	Vector2i vert2(int(v2.x()), int(v2.y()));
 
-	plot_line(vert0, vert1);
-	plot_line(vert1, vert2);
-	plot_line(vert2, vert0);
+
+	plot_line({ int(v0.x()), int(v0.y()) }, { int(v1.x()), int(v1.y()) });
+	plot_line({ int(v1.x()), int(v1.y()) }, { int(v2.x()), int(v2.y()) });
+	plot_line({ int(v2.x()), int(v2.y()) }, { int(v0.x()), int(v0.y()) });
 }
 
 bool insideTriangle(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f p){ 
@@ -167,6 +165,7 @@ bool insideTriangle(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f p){
 	}
 	return false;
 }
+
 Vector3f computeBaryCentric2D(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f p) {
 	float alpha, beta, gamma;
 	alpha = (p.x() * (v1.y() - v2.y()) + (v2.x() - v1.x()) * p.y() + v1.x() * v2.y() - v2.x() * v1.y()) / (v0.x() * (v1.y() - v2.y()) + (v2.x() - v1.x()) * v0.y() + v1.x() * v2.y() - v2.x() * v1.y());
@@ -209,18 +208,18 @@ void Rasterizer::draw_fragment(Triangle& t) {
 	ylow = std::max(int(round(ymin)), 0);
 	yupp = std::min(int(round(ymax)), Height);
 
-	for (int j = ylow; j < yupp; ++j) {
-		for (int i = xlow; i < xupp; ++i) {
-			if (insideTriangle(Vector3f(v0.x(), v0.y(), 1), Vector3f(v1.x(), v1.y(), 1),
-				Vector3f(v2.x(), v2.y(), 1), Vector3f(0.5f + i, 0.5f + j, 1))) {
+	for (size_t j = ylow; j < yupp; ++j) {
+		for (size_t i = xlow; i < xupp; ++i) {
+			if (insideTriangle({ v0.x(), v0.y(), 1 }, { v1.x(), v1.y(), 1 },
+				{ v2.x(), v2.y(), 1 }, { 0.5f + i, 0.5f + j, 1 })) {
 				Vector3f coef;
-				coef = computeBaryCentric2D(Vector3f(v0.x(), v0.y(), 1), Vector3f(v1.x(), v1.y(), 1),
-					Vector3f(v2.x(), v2.y(), 1), Vector3f(0.5f + i, 0.5f + j, 1));
+				coef = computeBaryCentric2D({ v0.x(), v0.y(), 1 }, { v1.x(), v1.y(), 1 },
+					{ v2.x(), v2.y(), 1 }, { 0.5f + i, 0.5f + j, 1 });
 				float z_interpolate = coef.x() * v0.z() + coef.y() * v1.z() + coef.z() * v2.z();
 				Vector3f color = t.v0.col.cwsiseDot(coef.x()) + t.v1.col.cwsiseDot(coef.y()) + t.v2.col.cwsiseDot(coef.z());
 				if (z_interpolate > depth_buffer[Width * j + i]) {
 					depth_buffer[Width * j + i] = z_interpolate;
-					set_pixel({ i, j }, color);
+					set_pixel(int(i), int(j) , color);
 				}
 			}
 		}
@@ -229,7 +228,7 @@ void Rasterizer::draw_fragment(Triangle& t) {
 
 }
 
-void Rasterizer::draw(std::vector<Triangle*> Tri_lists, DrawType type = DrawType::WIREFRAME) {
+void Rasterizer::draw(std::vector<Triangle*>& Tri_lists, DrawType type = DrawType::WIREFRAME) {
 	switch (type) {
 	case DrawType::WIREFRAME:
 		for (auto tri : Tri_lists) {
