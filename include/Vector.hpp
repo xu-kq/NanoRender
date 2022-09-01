@@ -35,6 +35,7 @@ public:
 		}
 	}
 	Vector2f(const float xx, const float yy) : _x(xx), _y(yy) { }
+	Vector2f(std::vector<float>& arr) : _x(arr[0]), _y(arr[1]) { }
 
 	const float x() const { return _x; }
 	const float y() const { return _y; }
@@ -67,16 +68,20 @@ public:
 	float& operator[](const int i) { return (&_x)[i]; }
 	const float& operator[](const int i) const { return (&_x)[i]; }
 
+
 	const float dot(const Vector3f&) const;
 	const Vector3f cross(const Vector3f&) const;
-	const Vector3f cwsiseDot(float) const;
 	const float norm() const;
-
+	Vector3f cwsiseProduct(const Vector3f&) const;
+	Vector3f normalized() const;
+	Vector3f operator+(const Vector3f&) const;
+	Vector3f operator-(const Vector3f&) const;
+	Vector3f operator/(const float) const;
 private:
 	float _x, _y, _z;
 };
-Vector3f operator+(const Vector3f&, const Vector3f&);
-
+Vector3f operator*(const Vector3f&, const float);
+Vector3f operator*(const float, const Vector3f&);
 
 class Vector4f {
 public:
@@ -114,4 +119,5 @@ private:
 
 std::ostream& operator<<(std::ostream&, const Vector3f&);
 std::ostream& operator<<(std::ostream&, const Vector4f&);
-const Vector4f to_vec4(const Vector3f& v);
+const Vector3f to_vec3(const Vector4f&);
+const Vector4f to_vec4(const Vector3f&, float w = 1.f);

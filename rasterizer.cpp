@@ -1,5 +1,6 @@
 #include"rasterizer.hpp"
 
+
 void Rasterizer::set_pixel(const Vector2i& v, const Vector3f& color) {
 	int x = v.x(), y = Height - 1 - v.y();
 	if (x < 0 || x >= Width || y < 0 || y >= Height) {
@@ -8,7 +9,7 @@ void Rasterizer::set_pixel(const Vector2i& v, const Vector3f& color) {
 	frame_buffer[4 * Width * y + 4 * x + 0] = (unsigned char)color.z();
 	frame_buffer[4 * Width * y + 4 * x + 1] = (unsigned char)color.y();
 	frame_buffer[4 * Width * y + 4 * x + 2] = (unsigned char)color.x();
-	frame_buffer[4 * Width * y + 4 * x + 3] = 255;
+	frame_buffer[4 * Width * y + 4 * x + 3] = (unsigned char)255;
 }
 
 void Rasterizer::set_pixel(const int x, const int y, const Vector3f& color) {
@@ -125,12 +126,16 @@ void Rasterizer::set_projection_matrix(const Matrix4f& projection) {
 	p = projection;
 }
 
+void Rasterizer::set_mv_inv_transpose() {
+	mv_inv_t = (v * m).inverse().transpose();
+}
+
 void Rasterizer::draw_wireframe(Triangle& t) {
 	Matrix4f mvp = p * v * m;
 	Vector4f v0, v1, v2;
-	v0 = mvp * to_vec4(t.v0.pos);
-	v1 = mvp * to_vec4(t.v1.pos);
-	v2 = mvp * to_vec4(t.v2.pos);
+	v0 = mvp * to_vec4(t.v0.position);
+	v1 = mvp * to_vec4(t.v1.position);
+	v2 = mvp * to_vec4(t.v2.position);
 	
 	v0 = v0 / v0.w();
 	v1 = v1 / v1.w();
@@ -177,9 +182,21 @@ Vector3f computeBaryCentric2D(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f p)
 void Rasterizer::draw_fragment(Triangle& t) {
 	Matrix4f mvp = p * v * m;
 	Vector4f v0, v1, v2;
-	v0 = mvp * to_vec4(t.v0.pos);
-	v1 = mvp * to_vec4(t.v1.pos);
-	v2 = mvp * to_vec4(t.v2.pos);
+	v0 = mvp * to_vec4(t.v0.position);
+	v1 = mvp * to_vec4(t.v1.position);
+	v2 = mvp * to_vec4(t.v2.position);
+	
+	// viewspace n and v
+	Vector3f n0, n1, n2;
+	n0 = to_vec3(mv_inv_t * to_vec4(t.v0.normal));
+	n1 = to_vec3(mv_inv_t * to_vec4(t.v1.normal));
+	n2 = to_vec3(mv_inv_t * to_vec4(t.v2.normal));
+
+	Vector3f view_v0, view_v1, view_v2;
+	view_v0 = to_vec3(v * m * to_vec4(t.v0.position));
+	view_v1 = to_vec3(v * m * to_vec4(t.v1.position));
+	view_v2 = to_vec3(v * m * to_vec4(t.v2.position));
+
 
 	v0 = v0 / v0.w();
 	v1 = v1 / v1.w();
@@ -203,42 +220,50 @@ void Rasterizer::draw_fragment(Triangle& t) {
 	ymax = std::max({ v0.y(), v1.y(), v2.y() });
 
 	int xlow, xupp, ylow, yupp;
-	xlow = std::max(int(round(xmin)), 0);
-	xupp = std::min(int(round(xmax)), Width);
-	ylow = std::max(int(round(ymin)), 0);
-	yupp = std::min(int(round(ymax)), Height);
+	xlow = std::max(int(xmin), 0);
+	xupp = std::min(int(xmax + 1), Width - 1);
+	ylow = std::max(int(ymin), 0);
+	yupp = std::min(int(ymax + 1), Height - 1);
 
-	for (size_t j = ylow; j < yupp; ++j) {
-		for (size_t i = xlow; i < xupp; ++i) {
+	for (size_t j = ylow; j <= yupp; ++j) {
+		for (size_t i = xlow; i <= xupp; ++i) {
 			if (insideTriangle({ v0.x(), v0.y(), 1 }, { v1.x(), v1.y(), 1 },
 				{ v2.x(), v2.y(), 1 }, { 0.5f + i, 0.5f + j, 1 })) {
-				Vector3f coef;
-				coef = computeBaryCentric2D({ v0.x(), v0.y(), 1 }, { v1.x(), v1.y(), 1 },
+				Vector3f coef = computeBaryCentric2D({ v0.x(), v0.y(), 1 }, { v1.x(), v1.y(), 1 },
 					{ v2.x(), v2.y(), 1 }, { 0.5f + i, 0.5f + j, 1 });
 				float z_interpolate = coef.x() * v0.z() + coef.y() * v1.z() + coef.z() * v2.z();
-				Vector3f color = t.v0.col.cwsiseDot(coef.x()) + t.v1.col.cwsiseDot(coef.y()) + t.v2.col.cwsiseDot(coef.z());
-				if (z_interpolate > depth_buffer[Width * j + i]) {
+				if (z_interpolate >= depth_buffer[Width * j + i]) {
 					depth_buffer[Width * j + i] = z_interpolate;
+					Vector3f position = coef.x() * view_v0 
+						+ coef.y() * view_v1
+						+ coef.z() * view_v2;
+					Vector3f normal = n0 * coef.x()
+						+ n1 * coef.y()
+						+ n2 * coef.z();
+					Vector3f color = fragment_shader_BlinnPhong(position, { 0, 0 }, normal);
 					set_pixel(int(i), int(j) , color);
 				}
 			}
 		}
 	}
-
-
 }
 
 void Rasterizer::draw(std::vector<Triangle*>& Tri_lists, DrawType type = DrawType::WIREFRAME) {
+	set_mv_inv_transpose();
 	switch (type) {
 	case DrawType::WIREFRAME:
 		for (auto tri : Tri_lists) {
 			draw_wireframe(*tri);
 		}
 		break;
-	case DrawType::FRAGMENT:
+	case DrawType::NORMAL:
 		for (auto tri : Tri_lists) {
 			draw_fragment(*tri);
 		}
 		break;
+	case DrawType::BLINNPHONG:
+		for (auto tri : Tri_lists) {
+
+		}
 	}
 }

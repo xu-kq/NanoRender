@@ -1,8 +1,10 @@
+#pragma once
 #include<fstream>
 #include<sstream>
 #include<string>
 #include<iostream>
 #include<vector>
+#include<Vector.hpp>
 
 
 struct objLoader {
@@ -56,43 +58,6 @@ struct objLoader {
 				normal_ind.push_back(nInd);
 			}
 		}
-		for (auto& vertex : vertex_position) {
-			if (vertex.size() != 3) {
-				std::cerr << "failed to load vertex data" << std::endl;
-				throw std::runtime_error("failed to load vertex data");
-				
-			}
-		}
-		for (auto& normal : vertex_normal) {
-			if (normal.size() != 3) {
-				std::cerr << "failed to load normal data" << std::endl;
-				throw std::runtime_error("failed to load normal data");
-			}
-		}
-		for (auto& texture : vertex_texture) {
-			if (texture.size() != 2) {
-				std::cerr << "failed to load texture data" << std::endl;
-				throw std::runtime_error("failed to load texture data");
-			}
-		}
-		for (auto& face : position_ind) {
-			if (face.size() != 3) {
-				std::cerr << "failed to load position index" << std::endl;
-				throw std::runtime_error("failed to load face data");
-			}
-		}
-		for (auto& face : texture_ind) {
-			if (face.size() != 3) {
-				std::cerr << "failed to load texture index" << std::endl;
-				throw std::runtime_error("failed to load face data");
-			}
-		}
-		for (auto& face : normal_ind) {
-			if (face.size() != 3) {
-				std::cerr << "failed to load normal index" << std::endl;
-				throw std::runtime_error("failed to load face data");
-			}
-		}
 		std::cout << "Successfully load: " << ifile << std::endl;
 	}
 
@@ -100,9 +65,9 @@ struct objLoader {
 public:
 	std::string ifile;
 
-	std::vector<std::vector<float>> vertex_position;
-	std::vector<std::vector<float>> vertex_texture;
-	std::vector<std::vector<float>> vertex_normal;
+	std::vector<Vector3f> vertex_position;
+	std::vector<Vector2f> vertex_texture;
+	std::vector<Vector3f> vertex_normal;
 
 	std::vector<std::vector<int>> position_ind;
 	std::vector<std::vector<int>> texture_ind;

@@ -1,90 +1,12 @@
 #include"global.hpp"
 #include<Vector.hpp>
 
-
-Matrix4f get_model_matrix(const Vector3f& offset, const float _angle, const float scale = 1.f) {
-	Matrix4f rotation;
-	float angle = _angle * MY_PI / 180.f;
-	//rotation << 
-	// cos(angle), -sin(angle), 0, 0,
-	//	sin(angle), cos(angle), 0, 0,
-	//	0, 0, 1, 0,
-	//	0, 0, 0, 1;
-	rotation << 
-		cos(angle), 0, sin(angle), 0,
-		0, 1, 0, 0,
-		-sin(angle), 0, cos(angle), 0,
-		0, 0, 0, 1;
-
-	float x_offset, y_offset, z_offset;
-	x_offset = offset.x(),
-		y_offset = offset.y(),
-		z_offset = offset.z();
-
-	Matrix4f m;
-	m << 
-		scale, 0, 0, x_offset,
-		0, scale, 0, y_offset,
-		0, 0, scale, z_offset,
-		0, 0, 0, 1;
-	return rotation * m;
-}
-
-/*
-	view_pos:	location of camera
-	t:			up direction
-	g:			gaze direction
-*/
-Matrix4f get_view_matrix(const Vector3f& view_pos, const Vector3f& t, const Vector3f& g) {
-	Vector3f gxt = g.cross(t);
-	Matrix4f v, rotation(Matrix4f::Identity()), translation(Matrix4f::Identity());
-
-	translation[0][3] = -view_pos.x();
-	translation[1][3] = -view_pos.y();
-	translation[2][3] = -view_pos.z();
-	rotation << 
-		gxt.x(), gxt.y(), -gxt.z(), 0,
-		t.x(), t.y(), -t.z(), 0,
-		g.x(), g.y(), -g.z(), 0,
-		0, 0, 0, 1;
-	v = rotation * translation;
-
-	return v;
-}
-
-Matrix4f get_projection_matrix(const float _fov, const float _aspect_ratio, 
-	const float _zNear, const float _zFar) {
-	float fov = _fov / 180 * MY_PI;
-	float t, d, l, r, n, f;
-
-	n = _zNear;
-	f = _zFar;
-	d = std::tan(fov / 2) * n;
-	t = -d;
-	r = _aspect_ratio * t;
-	l = -r;
-
-	Matrix4f v, orthographic, projection;
-	projection <<
-		n, 0, 0, 0,
-		0, n, 0, 0,
-		0, 0, n + f, -n* f,
-		0, 0, 1, 0;
-	orthographic <<
-		2.f / (r - l), 0, 0, (r + l) / (r - l),
-		0, 2.f / (t - d), 0, (t + d) / (t - d),
-		0, 0, 2.f / (n - f), (n + f) / (n - f),
-		0, 0, 0, 1;
-	v = orthographic * projection;
-	return v;
-		}
-
-int main(void)
+int main()
 {
 	// -----------------------------  screen init
 	int Height = 700, Width = 700;
 	Screen screen;
-	TCHAR* title = _T("Mini3d (software render tutorial) - ")
+	TCHAR* title = _T("NanoRender (software render tutorial) - ")
 		_T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
 	if (screen.screen_init(Width, Height, title))
 			return -1;
@@ -94,7 +16,7 @@ int main(void)
 	Rasterizer r(Width, Height, screen.get_frame_buffer());
 	// place camera
 	Vector3f offset(0, 0, 0);
-	Vector3f view_pos(0, 0, 5);
+	Vector3f view_pos(0, 0, 10);
 	Vector3f up_dir(0, 1, 0);
 	Vector3f gaze(0, 0, -1);
 	// perspective properties
@@ -102,7 +24,7 @@ int main(void)
 	fov = 45,
 		aspect_ratio = 1,
 		zNear = -.1f,
-		zFar = -50;
+		zFar = -50.f;
 
 
 	// -----------------------------  load "*.obj" file
@@ -110,16 +32,18 @@ int main(void)
 	objLoader obj(obj_filename);
 	std::vector<Triangle*> Tri_lists;
 	Triangle* t;
-	for (auto& indice : obj.position_ind) {
-		size_t pos_ind, tex_ind, nor_ind;
-		pos_ind = indice[0];
-		tex_ind = indice[1];
-		nor_ind = indice[2];
-
-		t = new Triangle(obj.vertex_position[pos_ind], 
-			obj.vertex_position[tex_ind], 
-			obj.vertex_position[nor_ind]
-		);
+	for (size_t i = 0; i < obj.position_ind.size(); ++i) {
+		std::vector<int> pos_ind = obj.position_ind[i];
+		std::vector<int> tex_ind = obj.texture_ind[i];
+		std::vector<int> nor_ind = obj.normal_ind[i];
+		std::vector<Vertex> tri_vertex;
+		for (int j = 0; j < 3; ++j) {
+			Vertex vert(obj.vertex_position.at(pos_ind[j]),
+				obj.vertex_texture.at(tex_ind[j]),
+				obj.vertex_normal.at(nor_ind[j]));
+			tri_vertex.emplace_back(vert);
+		}
+		t = new Triangle(tri_vertex);
 		Tri_lists.emplace_back(t);
 	}
 
@@ -127,14 +51,14 @@ int main(void)
 	// -----------------------------	update the frame_buffer displayed on the screen
 	int indicator = 0;
 	int kbhit = 0;
-	float alpha = 0.f;
+	float alpha = 140.f;
 	while (screen.screen_exit == 0 && screen.screen_keys[VK_ESCAPE] == 0) {
 		screen.screen_dispatch();
 		r.flush();
-		r.set_model_matrix(get_model_matrix(offset, alpha, 1));
-		r.set_view_matrix(get_view_matrix(view_pos, up_dir, gaze));
-		r.set_projection_matrix(get_projection_matrix(fov, aspect_ratio, zNear, zFar));
-		r.draw(Tri_lists, DrawType::WIREFRAME);
+		r.set_model_matrix(Vertex_process::get_model_matrix(offset, alpha, 2.5f));
+		r.set_view_matrix(Vertex_process::get_view_matrix(view_pos, up_dir, gaze));
+		r.set_projection_matrix(Vertex_process::get_projection_matrix(fov, aspect_ratio, zNear, zFar));
+		r.draw(Tri_lists, DrawType::NORMAL);
 
 		if (screen.screen_keys[VK_UP]) view_pos.z() -= .05f;
 		if (screen.screen_keys[VK_DOWN]) view_pos.z() += .05f;

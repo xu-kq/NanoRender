@@ -12,10 +12,10 @@ public:
 
 	Vector4f operator*(const Vector4f&) const;
 	Matrix4f operator*(const Matrix4f& rhs) const;
-
-	static Matrix4f Identity() {
-		return identity;
-	};
+	static Matrix4f Identity() { return identity; };
+	Matrix4f transpose() const;
+	void swap_row(int i, int j);
+	Matrix4f inverse() const;
 
 private:
 	std::array<std::array<float, 4>, 4> _arr;

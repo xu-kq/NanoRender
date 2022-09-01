@@ -1,16 +1,18 @@
 #pragma once
+#include"fragment.hpp"
 #include"Matrix.hpp"
 #include"Triangle.hpp"
 #include<vector>
 #include<algorithm>
 #include<tuple>
-enum DrawType { WIREFRAME, FRAGMENT};
+
+enum DrawType { WIREFRAME, NORMAL, BLINNPHONG};
 
 class Rasterizer {
 public:
 	Rasterizer(int width, int height, unsigned char* fb)
 		: frame_buffer(fb), Width(width), Height(height),
-		depth_buffer(Width*Height, std::numeric_limits<float>::lowest()) {}
+		depth_buffer(size_t(Width)*Height, std::numeric_limits<float>::lowest()) {}
 
 	void draw_wireframe(Triangle&);
 	void draw_fragment(Triangle&);
@@ -18,6 +20,7 @@ public:
 	void set_model_matrix(const Matrix4f&);
 	void set_view_matrix(const Matrix4f&);
 	void set_projection_matrix(const Matrix4f&);
+	void set_mv_inv_transpose();
 	void flush();
 
 
@@ -30,6 +33,7 @@ private:
 	Matrix4f m;
 	Matrix4f v;
 	Matrix4f p;
+	Matrix4f mv_inv_t;
 
 	// Breseham Algorithm
 	void plot_line(const Vector2i& start, const Vector2i& end, const Vector3f& color = Vector3f(255, 255, 255));

@@ -1,16 +1,23 @@
 #pragma once
 #include<array>
 #include<Vector.hpp>
+
+
 class Vertex {
 public:
-	Vertex(Vector3f& v, Vector3f& c = Vector3f(  255, 255, 255 )) : pos(v), col(c) { }
-	Vertex(std::vector<float>& v) : pos(v), col({ 255, 255, 255 }) { }
+	Vertex(const Vector3f& p, const Vector2f& t, const Vector3f& n)
+		: position(p), texture(t), normal(n) { }
 public:
-	Vector3f pos;
-	Vector3f col;
+	Vector3f position;
+	Vector2f texture;
+	Vector3f normal;
 };
+
+
 class Triangle {
 public:
-	Triangle(Vertex vert0, Vertex vert1, Vertex vert2) : v0(vert0), v1(vert1), v2(vert2) { }
+	Triangle(const Vertex& vert0, const Vertex& vert1, const Vertex& vert2)
+		: v0(vert0), v1(vert1), v2(vert2) { }
+	Triangle(std::vector<Vertex>& vlists) : v0(vlists[0]), v1(vlists[1]), v2(vlists[2]) { }
 	Vertex v0, v1, v2;
 };
