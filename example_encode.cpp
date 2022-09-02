@@ -74,7 +74,7 @@ void encodeWithState(const char* filename, std::vector<unsigned char>& image, un
 //saves image to filename given as argument. Warning, this overwrites the file without warning!
 int main(int argc, char *argv[]) {
   //NOTE: this sample will overwrite the file or test.png without warning!
-  const char* filename = argc > 1 ? argv[1] : "test.png";
+  const char* filename = argc > 1 ? argv[1] : "../../../image/test.png";
 
   //generate some image
   unsigned width = 512, height = 512;
@@ -87,6 +87,5 @@ int main(int argc, char *argv[]) {
     image[4 * width * y + 4 * x + 2] = x | y;
     image[4 * width * y + 4 * x + 3] = 255;
   }
-
   encodeOneStep(filename, image, width, height);
 }
