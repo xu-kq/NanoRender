@@ -1,17 +1,44 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.24)
+project(NanoRender LANGUAGES CXX
+		VERSION 0.1.0
+		DESCRIPTION "A simple toy renderer after series course of GAMES 101."
+		HOMEPAGE_URL "https://github.com/xu-kq"
+		)
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(NanoRasterizer)
+if (NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Release)
+endif ()
 
-add_subdirectory("include")
+if (WIN32)
+	# NOMINMAX: stay from 'min/max' macro in <windows.h>
+	# _USE_MATH_DEFINES: to use math macro such 'M_PI' in <cmath>
+	add_definitions(-DNOMINMAX -D_USE_MATH_DEFINES)
+endif ()
 
-# add the excutable
-add_executable(NanoRasterizer "main.cpp" "rasterizer.cpp" "triangle.cpp" "screen.cpp" 
-"global.cpp" "fragment.cpp")
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 
-target_link_libraries(NanoRasterizer PUBLIC Lodepng Algebra)
-target_include_directories(NanoRasterizer PUBLIC
-							"${PROJECT_SOURCE_DIR}/include"
-							)
+# Main Executable
+add_executable(rasterizer main.cpp)
+
+add_subdirectory(src bin)
+
+target_include_directories(rasterizer PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(rasterizer
+		PRIVATE
+		Fragment
+		Loader_obj
+		Loader_png
+		Math
+		Rasterizer
+		Scene
+		Screen
+		Triangle
+		Utility
+		)
