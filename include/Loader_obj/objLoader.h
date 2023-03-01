@@ -24,29 +24,29 @@ struct objLoader {
 				while (record >> coord) {
 					v.push_back(coord);
 				}
-				vertex_position.push_back(v);
+				vertex_position.emplace_back(v);
 			}
 			if (type == "vn") {
 				std::vector<double> n;
 				while (record >> coord) {
 					n.push_back(coord);
 				}
-				vertex_normal.push_back(n);
+				vertex_normal.emplace_back(n);
 			}
 			if (type == "vt") {
 				std::vector<double> t;
 				while (record >> coord) {
 					t.push_back(coord);
 				}
-				vertex_texture.push_back(t);
+				vertex_texture.emplace_back(t);
 			}
 			if (type == "f") {
 				std::vector<int> pInd, tInd, nInd;
 				while (record >> str) {
-					std::size_t l = str.find_first_of("/");
+					std::size_t l = str.find_first_of('/');
 					int p_ind, t_ind, n_ind;
 					p_ind = std::stoi(std::string(str.begin(), str.begin() + l));
-					std::size_t r = str.find_first_of("/", l + 1);
+					std::size_t r = str.find_first_of('/', l + 1);
 					t_ind = std::stoi(std::string(str.begin() + l + 1, str.begin() + r));
 					n_ind = std::stoi(std::string(str.begin() + r + 1, str.end()));
 					pInd.push_back(p_ind - 1);

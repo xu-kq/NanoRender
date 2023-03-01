@@ -114,24 +114,24 @@ void Rasterizer::flush() {
 	std::fill(depth_buffer.begin(), depth_buffer.end(), std::numeric_limits<double>::lowest());
 }
 
-void Rasterizer::set_model_matrix(const Matrix4d& model) {
-	m = model;
+void Rasterizer::set_NANO_MATRIX_M(const Matrix4d& model) {
+	NANO_MATRIX_M = model;
 }
 
-void Rasterizer::set_view_matrix(const Matrix4d& view) {
-	v = view;
+void Rasterizer::set_NANO_MATRIX_V(const Matrix4d& view) {
+	NANO_MATRIX_V = view;
 }
 
-void Rasterizer::set_projection_matrix(const Matrix4d& projection) {
-	p = projection;
+void Rasterizer::set_NANO_MATRIX_P(const Matrix4d& projection) {
+	NANO_MATRIX_P = projection;
 }
 
-void Rasterizer::set_mv_inv_transpose() {
-	mv_inv_t = (v * m).inverse().transpose();
+void Rasterizer::set_NANO_MATRIX_IT_MV() {
+	NANO_MATRIX_IT_MV = (NANO_MATRIX_V * NANO_MATRIX_M).inverse().transpose();
 }
 
-void Rasterizer::draw_wireframe(Triangle& t) {
-	Matrix4d mvp = p * v * m;
+void Rasterizer::drawWireFrame(Triangle& t) {
+	Matrix4d mvp = NANO_MATRIX_P * NANO_MATRIX_V * NANO_MATRIX_M;
 	Vector4f v0, v1, v2;
 	v0 = mvp * to_vec4(t.v0.position);
 	v1 = mvp * to_vec4(t.v1.position);
@@ -179,8 +179,8 @@ Vector3d computeBaryCentric2D(Vector3d v0, Vector3d v1, Vector3d v2, Vector3d p)
 	return { alpha, beta, gamma };
 }
 
-void Rasterizer::draw_fragment(Triangle& t) {
-	Matrix4d mvp = p * v * m;
+void Rasterizer::drawFragment(Triangle& t) {
+	Matrix4d mvp = NANO_MATRIX_P * NANO_MATRIX_V * NANO_MATRIX_M;
 	Vector4f v0, v1, v2;
 	v0 = mvp * to_vec4(t.v0.position);
 	v1 = mvp * to_vec4(t.v1.position);
@@ -188,14 +188,14 @@ void Rasterizer::draw_fragment(Triangle& t) {
 	
 	// viewspace n and v
 	Vector3d n0, n1, n2;
-	n0 = to_vec3(mv_inv_t * to_vec4(t.v0.normal));
-	n1 = to_vec3(mv_inv_t * to_vec4(t.v1.normal));
-	n2 = to_vec3(mv_inv_t * to_vec4(t.v2.normal));
+	n0 = to_vec3(NANO_MATRIX_IT_MV * to_vec4(t.v0.normal));
+	n1 = to_vec3(NANO_MATRIX_IT_MV * to_vec4(t.v1.normal));
+	n2 = to_vec3(NANO_MATRIX_IT_MV * to_vec4(t.v2.normal));
 
 	Vector3d view_v0, view_v1, view_v2;
-	view_v0 = to_vec3(v * m * to_vec4(t.v0.position));
-	view_v1 = to_vec3(v * m * to_vec4(t.v1.position));
-	view_v2 = to_vec3(v * m * to_vec4(t.v2.position));
+	view_v0 = to_vec3(NANO_MATRIX_V * NANO_MATRIX_M * to_vec4(t.v0.position));
+	view_v1 = to_vec3(NANO_MATRIX_V * NANO_MATRIX_M * to_vec4(t.v1.position));
+	view_v2 = to_vec3(NANO_MATRIX_V * NANO_MATRIX_M * to_vec4(t.v2.position));
 
 
 	v0 = v0 / v0.w();
@@ -249,16 +249,16 @@ void Rasterizer::draw_fragment(Triangle& t) {
 }
 
 void Rasterizer::draw(std::vector<Triangle*>& Tri_lists, DrawType type = DrawType::WIREFRAME) {
-	set_mv_inv_transpose();
+	set_NANO_MATRIX_IT_MV();
 	switch (type) {
 	case DrawType::WIREFRAME:
 		for (auto tri : Tri_lists) {
-			draw_wireframe(*tri);
+			drawWireFrame(*tri);
 		}
 		break;
 	case DrawType::NORMAL:
 		for (auto tri : Tri_lists) {
-			draw_fragment(*tri);
+			drawFragment(*tri);
 		}
 		break;
 	case DrawType::BLINNPHONG:
