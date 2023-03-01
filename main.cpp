@@ -5,16 +5,12 @@ int main() {
 	std::string output_image{"../../image/output.png"};
 
 	// -----------------------------  screen init
-	int Height = 700, Width = 700;
-	Screen screen;
-	TCHAR *title = _T("NanoRender (software render tutorial) - ")
-	               _T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
-	if (screen.screen_init(Width, Height, title))
-		return -1;
-
+	constexpr int Height = 700, Width = 700;
+	auto screen = Screen::Instance().setting(Width, Height);
 
 	// -----------------------------  rasterizer init
-	Rasterizer r(Width, Height, screen.get_frame_buffer());
+	auto r = Rasterizer::Instance().setting(Width, Height, screen.getFrameBuffer());
+
 	// place camera
 	Vector3d offset(0, 0, 0);
 	Vector3d view_pos(0, 0, 10);
@@ -22,7 +18,7 @@ int main() {
 	Vector3d gaze(0, 0, -1);
 	// perspective properties
 	float fov, aspect_ratio, zNear, zFar;
-	fov = 45;
+	fov = 45.f;
 	aspect_ratio = 1.f;
 	zNear = -.1f;
 	zFar = -50.f;
@@ -31,21 +27,19 @@ int main() {
 	// -----------------------------  load "*.obj" file
 	std::string obj_filename(input_model);
 	objLoader obj(obj_filename);
-	std::vector<Triangle *> Tri_lists;
-	Triangle *t;
-	for (size_t i = 0; i < obj.position_ind.size(); ++i) {
-		std::vector<int> pos_ind = obj.position_ind[i];
-		std::vector<int> tex_ind = obj.texture_ind[i];
-		std::vector<int> nor_ind = obj.normal_ind[i];
+	std::vector<Triangle *> TriLists;
+	for (int i = 0; i < obj.position_ind.size(); ++i) {
+		auto pos_ind = obj.position_ind[i];
+		auto tex_ind = obj.texture_ind[i];
+		auto nor_ind = obj.normal_ind[i];
+
 		std::vector<Vertex> tri_vertex;
 		for (int j = 0; j < 3; ++j) {
-			Vertex vert(obj.vertex_position.at(pos_ind[j]),
-			            obj.vertex_texture.at(tex_ind[j]),
-			            obj.vertex_normal.at(nor_ind[j]));
-			tri_vertex.emplace_back(vert);
+			tri_vertex.emplace_back(obj.vertex_position.at(pos_ind[j]),
+			                        obj.vertex_texture.at(tex_ind[j]),
+			                        obj.vertex_normal.at(nor_ind[j]));
 		}
-		t = new Triangle(tri_vertex);
-		Tri_lists.emplace_back(t);
+		TriLists.emplace_back(new Triangle(tri_vertex));
 	}
 
 
@@ -56,10 +50,10 @@ int main() {
 	while (screen.screen_exit == 0 && screen.screen_keys[VK_ESCAPE] == 0) {
 		screen.screen_dispatch();
 		r.flush();
-		r.set_model_matrix(Vertex_process::get_model_matrix(offset, alpha, 2.5f));
-		r.set_view_matrix(Vertex_process::get_view_matrix(view_pos, up_dir, gaze));
-		r.set_projection_matrix(Vertex_process::get_projection_matrix(fov, aspect_ratio, zNear, zFar));
-		r.draw(Tri_lists, DrawType::NORMAL);
+		r.set_NANO_MATRIX_M(Vertex_process::get_model_matrix(offset, alpha, 2.5f));
+		r.set_NANO_MATRIX_V(Vertex_process::get_view_matrix(view_pos, up_dir, gaze));
+		r.set_NANO_MATRIX_P(Vertex_process::get_projection_matrix(fov, aspect_ratio, zNear, zFar));
+		r.draw(TriLists, DrawType::NORMAL);
 
 		if (screen.screen_keys[VK_UP])
 			view_pos.z() -= .05f;
@@ -86,8 +80,8 @@ int main() {
 
 	// -----------------------------	save the last frame to the "output.png" file
 	const char *filename = output_image.c_str();
-	std::vector<unsigned char> image(screen.get_frame_buffer(),
-	                                 screen.get_frame_buffer() + sizeof(unsigned char) * 4 * Height * Width);
+	std::vector<unsigned char> image(screen.getFrameBuffer(),
+	                                 screen.getFrameBuffer() + sizeof(unsigned char) * 4 * Height * Width);
 	for (size_t j = 0; j < Height; ++j) {
 		for (size_t i = 0; i < Width; ++i) {
 			std::swap(image[j * 4 * Width + i * 4 + 0], image[j * 4 * Width + i * 4 + 2]);

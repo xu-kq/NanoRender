@@ -1,17 +1,29 @@
 #pragma once
-#include <Windows.h>
+#include <iostream>
 #include <tchar.h>
+#include <Windows.h>
 
 class Screen {
+private:
+	Screen() = default;
 public:
-	int screen_init(int w, int h, const TCHAR *title);  // 屏幕初始化
+	static Screen &Instance() {
+		static Screen screen;
+		return screen;
+	}
+	Screen &setting(int w, int h) {
+		screen_init(w, h);
+		return *this;
+	}
+	int screen_init(int w, int h, const TCHAR *title = _T("NanoRender (software render tutorial) - ")
+	                                                   _T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state"));  // 屏幕初始化
 	int screen_close(void);                // 关闭屏幕
 	void screen_dispatch(void);              // 处理消息
 	void screen_update(void);              // 显示 FrameBuffer
 
 	// win32 event handler
 	static LRESULT screen_events(HWND, UINT, WPARAM, LPARAM);
-	unsigned char *get_frame_buffer() {
+	unsigned char *getFrameBuffer() {
 		return screen_fb;
 	}
 

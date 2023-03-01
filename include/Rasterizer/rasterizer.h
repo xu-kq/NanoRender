@@ -7,41 +7,53 @@
 #include <Math/Matrix.h>
 #include <Fragment/fragment.h>
 
-enum DrawType { WIREFRAME, NORMAL, BLINNPHONG};
+enum class DrawType { WIREFRAME, NORMAL, BLINNPHONG };
 
 class Rasterizer {
+private:
+	// Ctor.
+	Rasterizer() : frame_buffer{nullptr}, depth_buffer{} {}
+	Rasterizer(int width, int height, unsigned char *fb)
+			: frame_buffer(fb), Width(width), Height(height),
+			  depth_buffer(size_t(Width) * Height, std::numeric_limits<double>::lowest()) {}
 public:
-	Rasterizer(int width, int height, unsigned char* fb)
-		: frame_buffer(fb), Width(width), Height(height),
-		depth_buffer(size_t(Width)*Height, std::numeric_limits<double>::lowest()) {}
+	// global instance
+	static Rasterizer &Instance() {
+		static Rasterizer r;
+		return r;
+	}
+	Rasterizer &setting(int width, int height, unsigned char *fb) {
+		frame_buffer = fb;
+		depth_buffer.resize(Width * Height, std::numeric_limits<double>::lowest());
+		return *this;
+	}
+	void drawWireFrame(Triangle &);
+	void drawFragment(Triangle &);
+	void draw(std::vector<Triangle *> &, DrawType);
 
-	void draw_wireframe(Triangle&);
-	void draw_fragment(Triangle&);
-	void draw(std::vector<Triangle*>&, DrawType);
-	void set_model_matrix(const Matrix4d&);
-	void set_view_matrix(const Matrix4d&);
-	void set_projection_matrix(const Matrix4d&);
-	void set_mv_inv_transpose();
+	void set_NANO_MATRIX_M(const Matrix4d &);
+	void set_NANO_MATRIX_V(const Matrix4d &);
+	void set_NANO_MATRIX_P(const Matrix4d &);
+	void set_NANO_MATRIX_IT_MV();
 	void flush();
 
-
 private:
-	const int Height = 700,
-		Width = 700;
-	unsigned char* frame_buffer;
+	int Height = 700;
+	int Width = 700;
+	unsigned char *frame_buffer;
 	std::vector<double> depth_buffer;
 
-	Matrix4d m;
-	Matrix4d v;
-	Matrix4d p;
-	Matrix4d mv_inv_t;
+	Matrix4d NANO_MATRIX_M;
+	Matrix4d NANO_MATRIX_V;
+	Matrix4d NANO_MATRIX_P;
+	Matrix4d NANO_MATRIX_IT_MV;
 
 	// Breseham Algorithm
-	void plot_line(const Vector2i& start, const Vector2i& end, const Vector3d& color = Vector3d(255, 255, 255));
-	void plot_line(const double x1, const double y1, const double x2, const double y2, 
-		const Vector3d& color = Vector3d(255, 255, 255));
+	void plot_line(const Vector2i &start, const Vector2i &end, const Vector3d &color = Vector3d(255, 255, 255));
+	void plot_line(double x1, double y1, double x2, double y2,
+	               const Vector3d &color = Vector3d(255, 255, 255));
 
 	// utility function
-	void set_pixel(const int, const int, const Vector3d&);
-	void set_pixel(const Vector2i&, const Vector3d&);
+	void set_pixel(int, int, const Vector3d &);
+	void set_pixel(const Vector2i &, const Vector3d &);
 };
