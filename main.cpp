@@ -1,5 +1,5 @@
 #include <Utility/global.h>
-
+#include <iostream>
 int main() {
 	std::string input_model{"../../models/spot/spot_triangulated_good.obj"};
 	std::string output_image{"../../image/output.png"};
@@ -30,6 +30,7 @@ int main() {
 	std::string obj_filename(input_model);
 	obj.read(obj_filename);
 	std::vector<std::shared_ptr<Triangle>> TriLists;
+
 	for (int i = 0; i < obj.indPosition.size(); ++i) {
 		auto pos_ind = obj.indPosition[i];
 		auto tex_ind = obj.indTexture[i];
@@ -47,7 +48,6 @@ int main() {
 	// Texture
 	auto pTexture = std::make_shared<Texture>(texture_image);
 	r.setTexture(pTexture);
-
 	// -----------------------------	update the frame_buffer displayed on the screen
 	int indicator = 0;
 	int kbhit = 0;
@@ -72,9 +72,9 @@ int main() {
 		if (screen.screen_keys[VK_DOWN])
 			view_pos.z() += .05f;
 		if (screen.screen_keys[VK_LEFT])
-			alpha += .5f;
-		if (screen.screen_keys[VK_RIGHT])
 			alpha -= .5f;
+		if (screen.screen_keys[VK_RIGHT])
+			alpha += .5f;
 
 		if (screen.screen_keys[VK_SPACE]) {
 			if (kbhit == 0) {

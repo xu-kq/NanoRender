@@ -371,8 +371,7 @@ void Rasterizer::drawTexture(Triangle &t) {
 							+ t.v1.texture * coef.y()
 							+ t.v2.texture * coef.z();
 					auto texture_color = pTexture->getColor(texture_coords);
-					texture_color = pTexture->getColor(t.v0.texture);
-					Vector3d color = fragment_shader_Texture(position, texture_color , normal);
+					Vector3d color = fragment_shader_Texture(position, texture_color, normal);
 					set_pixel(int(i), int(j), color);
 				}
 			}

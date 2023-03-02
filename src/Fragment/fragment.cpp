@@ -32,13 +32,13 @@ Vector3d fragment_shader_BlinnPhong(const Vector3d& point, const Vector3d& norma
 		result_color = result_color + Ld + Ls;
 	}
 	result_color = result_color + ka.cwsiseProduct(amb_light_intensity);
-	return result_color * 255.f;
+	return result_color * 255.;
 }
 
 Vector3d fragment_shader_Texture(const Vector3d& point, const Vector3d& texCol,
                                     const Vector3d& normal) {
 	Vector3d ka = Vector3d(0.005, 0.005, 0.005);
-	Vector3d kd = texCol / 255.f;
+	Vector3d kd = texCol / 255.;
 	Vector3d ks = Vector3d(0.7937, 0.7937, 0.7937);
 
 	std::vector<Vector3d> l1 = {{20, 20, 20}, {500, 500, 500} };
@@ -68,5 +68,9 @@ Vector3d fragment_shader_Texture(const Vector3d& point, const Vector3d& texCol,
 		result_color = result_color + Ld + Ls;
 	}
 	result_color = result_color + ka.cwsiseProduct(amb_light_intensity);
-	return result_color * 255.f;
+	result_color.x() = std::min(result_color.x(), 1.);
+	result_color.y() = std::min(result_color.y(), 1.);
+	result_color.z() = std::min(result_color.z(), 1.);
+
+	return result_color * 255.;
 }
