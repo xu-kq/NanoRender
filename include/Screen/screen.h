@@ -16,7 +16,7 @@ public:
 		return *this;
 	}
 	int screen_init(int w, int h, const TCHAR *title = _T("NanoRender (software render tutorial) - ")
-	                                                   _T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state"));  // 屏幕初始化
+	                                                   _T("Left/Right: rotation, Space: switch state"));  // 屏幕初始化
 	int screen_close(void);                // 关闭屏幕
 	void screen_dispatch(void);              // 处理消息
 	void screen_update(void);              // 显示 FrameBuffer

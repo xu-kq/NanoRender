@@ -40,6 +40,7 @@ target_link_libraries(rasterizer
 		Rasterizer
 		Scene
 		Screen
+		Texture
 		Triangle
 		Utility
 		)

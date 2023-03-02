@@ -1,9 +1,13 @@
 #pragma once
+#include <memory>
+#include <unordered_map>
+
 #include <Loader_png/lodepng.h>
 #include <Loader_obj/objLoader.h>
 #include <Triangle/triangle.h>
 #include <Screen/screen.h>
 #include <Rasterizer/rasterizer.h>
+#include <Texture/texture.h>
 
 #define MY_PI 3.14159265358979323846
 

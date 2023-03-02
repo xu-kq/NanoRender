@@ -42,9 +42,17 @@ public:
 
 	double &operator[](const int i) { return (&_x)[i]; }
 	const double &operator[](const int i) const { return (&_x)[i]; }
+
+	Vector2d operator+(const Vector2d &rhs) const {
+		return {x() + rhs.x(), y() + rhs.y()};
+	};
+
 private:
 	double _x, _y;
 };
+inline Vector2d operator*(const Vector2d &v, const double d) {
+	return {v.x() * d, v.y() * d};
+}
 
 class Vector3d {
 public:

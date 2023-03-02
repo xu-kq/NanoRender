@@ -6,8 +6,9 @@
 #include <Triangle/triangle.h>
 #include <Math/Matrix.h>
 #include <Fragment/fragment.h>
+#include <Texture/texture.h>
 
-enum class DrawType { WIREFRAME, NORMAL, BLINNPHONG };
+enum class DrawType { WIREFRAME, NORMAL, BLINNPHONG, TEXTURE };
 
 class Rasterizer {
 private:
@@ -27,10 +28,10 @@ public:
 		depth_buffer.resize(Width * Height, std::numeric_limits<double>::lowest());
 		return *this;
 	}
-	void drawWireFrame(Triangle &);
-	void drawFragment(Triangle &);
-	void draw(std::vector<Triangle *> &, DrawType);
 
+	void draw(std::vector<std::shared_ptr<Triangle>>& , DrawType);
+
+	void setTexture(std::shared_ptr<Texture> p) { pTexture = p; }
 	void set_NANO_MATRIX_M(const Matrix4d &);
 	void set_NANO_MATRIX_V(const Matrix4d &);
 	void set_NANO_MATRIX_P(const Matrix4d &);
@@ -42,6 +43,7 @@ private:
 	int Width = 700;
 	unsigned char *frame_buffer;
 	std::vector<double> depth_buffer;
+	std::shared_ptr<Texture> pTexture;
 
 	Matrix4d NANO_MATRIX_M;
 	Matrix4d NANO_MATRIX_V;
@@ -56,4 +58,8 @@ private:
 	// utility function
 	void set_pixel(int, int, const Vector3d &);
 	void set_pixel(const Vector2i &, const Vector3d &);
+	void drawWireFrame(Triangle &);
+	void drawNormal(Triangle &);
+	void drawFragment(Triangle &);
+	void drawTexture(Triangle &t);
 };
